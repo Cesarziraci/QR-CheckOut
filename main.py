@@ -59,7 +59,7 @@ Builder.load_string('''
 			allow_stretch: True
 
 		Label: 
-			text: 'Apertura/Cierre fabrica'
+			text: 'CheckOut fabrica'
 			color: 0,0,0
 			size_hint: .5, .95
 			font_size: 50
@@ -139,31 +139,35 @@ def Guardar_datos(qr_model, name):
 				size_hint=(.5, .5))
 
 	sheet1 = s.worksheet("Hoja 1")
-	Model = sheet1.find(qr_model)
-	state = sheet1.cell(Model.row, Model.col + 1).value
-
-	popupLabel = Label(text="La {} esta {} ".format(qr_model, state.lower()))
 	
-	match state:
-		case 'ABIERTO':
-			text='Cerrar'
-		case 'CERRADO':
-			text = 'Abrir'
-		case 'ENCENDIDO':
-			text = 'Apagar'
-		case 'APAGADO':
-			text = 'Encender'
+	try:
+		Model = sheet1.find(qr_model)
+		state = sheet1.cell(Model.row, Model.col + 1).value
 
-	switchbutton = Button(text=text, size_hint=(.4, .4))
+		popupLabel = Label(text="La {} esta {} ".format(qr_model, state.lower()))
+		
+		match state:
+			case 'ABIERTO':
+				text='Cerrar'
+			case 'CERRADO':
+				text = 'Abrir'
+			case 'ENCENDIDO':
+				text = 'Apagar'
+			case 'APAGADO':
+				text = 'Encender'
 
-	layout.add_widget(popupLabel)
-	layout.add_widget(switchbutton)
+		switchbutton = Button(text=text, size_hint=(.4, .4))
 
-	popup.open()
+		layout.add_widget(popupLabel)
+		layout.add_widget(switchbutton)
 
-	switchbutton.bind(on_press= lambda x:datos(qr_model, name, state))
-	switchbutton.bind(on_press=popup.dismiss)
+		popup.open()
 
+		switchbutton.bind(on_press= lambda x:datos(qr_model, name, state))
+		switchbutton.bind(on_press=popup.dismiss)
+	except AttributeError:
+		error("No se encontro esta ubicacion en la base de datos \n avisa al responsable", "Error")
+	
 def datos(qr_model, name, state):
 	sheet1 = s.worksheet("Hoja 1")
 	try:
@@ -189,39 +193,25 @@ def datos(qr_model, name, state):
 		qr_model = ' '
 
 	except (ValueError, NameError, TypeError):
-		error("Error! Avisar al encargado")
+		error("Error! Avisar al encargado", "Error")
 
-def Aviso_pop(text):
-	layout = GridLayout(cols=1, padding=10)
-	popup = Popup(title="Aviso!",
-					content=layout,
-					size_hint=(.5, .5))
+def error(text, tittle):
+    layout = GridLayout(cols=1, padding=10)
+    popup = Popup(title=tittle,
+                 content=layout,
+                 size_hint=(.5, .5))
 
-	popupLabel = Label(text=text)
-	closeButton = Button(text="cerrar", size_hint=(.3, .3))
+    popupLabel = Label(text=text)
+    closeButton = Button(text="Cerrar", size_hint=(.3, .3))
 
-	layout.add_widget(popupLabel)
-	layout.add_widget(closeButton)
+    layout.add_widget(popupLabel)
+    layout.add_widget(closeButton)
+    
+    closeButton.bind(on_oress = popup.dismiss)
+    popup.open()
 
-	popup.open()
 
-	closeButton.bind(on_press=popup.dismiss)
-
-def error(text):
-	layout = GridLayout(cols=1, padding=10)
-	popup = Popup(title="Error",
-					content=layout,
-					size_hint=(.5, .5))
-
-	popupLabel = Label(text=text)
-	closeButton = Button(text="Cerrar", size_hint=(.3, .3))
-
-	layout.add_widget(popupLabel)
-	layout.add_widget(closeButton)
-
-	popup.open()
-
-	closeButton.bind(on_press=popup.dismiss)
+    closeButton.bind(on_press=popup.dismiss)
 
 class CameraScreen(Screen):
 	camera_active = False
@@ -258,7 +248,7 @@ class CameraScreen(Screen):
 			self.manager.current = 'Main'
 
 class mainApp(App):
-	title = "Sigit-FAV"
+	title = "Sigit-CheckOut"
 	def build(self):
 		sm = ScreenManager()
 		sm.add_widget(MainScreen(name='Main'))
