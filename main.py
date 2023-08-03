@@ -26,7 +26,7 @@ scope = [
 
 creds = ServiceAccountCredentials.from_json_keyfile_name("sigit-apps-cc25c0f862ec.json", scope)
 client = gspread.authorize(creds)
-s = client.open('AperturaCierre_Fabrica')
+s = client.open('CheckIn_Fabrica')
 
 Builder.load_string('''
 <CameraScreen>:
@@ -142,7 +142,7 @@ def Guardar_datos(qr_model, name):
 	
 	try:
 		Model = sheet1.find(qr_model)
-		state = sheet1.cell(Model.row, Model.col + 1).value
+		state = sheet1.cell(Model.row, Model.col+1).value
 
 		popupLabel = Label(text="La {} esta {} ".format(qr_model, state.lower()))
 		
@@ -174,8 +174,10 @@ def datos(qr_model, name, state):
 		Time = ''
 		Time = ctime()
 		Model = sheet1.find(qr_model)
-		sheet1.update_cell(2, 4, Time)
-		sheet1.update_cell(2, 6, name)
+		Time_find = sheet1.find("Fecha Ultima Mod")
+		Name_find = sheet1.find("Ultima Persona en Modificar")
+		sheet1.update_cell(Time_find.row+1,Time_find.col, Time)
+		sheet1.update_cell(Name_find.row+1, Name_find.col, name)
 
 		match state:
 			case 'ABIERTO':
